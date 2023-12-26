@@ -1,0 +1,17 @@
+public class PetersonsAlgorithm {
+    private final boolean[] flag = new boolean[2];
+    private int victim;
+
+    public void lock(int threadId) {
+        int otherThreadId = 1 - threadId;
+        flag[threadId] = true;
+        victim = threadId;
+        while (flag[otherThreadId] && victim == threadId) {
+            // wait
+        }
+    }
+
+    public void unlock(int threadId) {
+        flag[threadId] = false;
+    }
+}
