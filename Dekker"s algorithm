@@ -1,0 +1,54 @@
+import java.util.concurrent.atomic.AtomicInteger;
+
+class Dekker {
+    private static volatile int turn = 1;
+// Indicates which process can enter the critical section
+    
+private static volatile boolean[] flag = {false, false}; 
+// Flags to indicate whether a process wants to enter
+
+    private static AtomicInteger sharedVariable = new AtomicInteger(0);
+// Shared variable
+
+    static class Process implements Runnable {
+        private int id;
+
+        public Process(int id) {
+            this.id = id;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                flag[id] = true;
+                while (flag[1 - id]) {
+                    if (turn == 1 - id) {
+                        flag[id] = false;
+                        while (turn == 1 - id) {
+                            // Busy wait
+                        }
+                        flag[id] = true;
+                    }
+                }
+
+                // Critical Section
+                System.out.println("Process " + id + " entering critical section.");
+                int currentValue = sharedVariable.get();
+                sharedVariable.set(currentValue + 1);
+                System.out.println("Shared variable: " + sharedVariable.get());
+                System.out.println("Process " + id + " leaving critical section.");
+
+                turn = 1 - id;
+                flag[id] = false;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Thread process0 = new Thread(new Process(0));
+        Thread process1 = new Thread(new Process(1));
+
+        process0.start();
+        process1.start();
+    }
+}
