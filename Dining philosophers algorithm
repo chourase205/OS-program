@@ -1,0 +1,43 @@
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
+using namespace std;
+
+const int num_philosophers = 5;
+mutex forks[num_philosophers];
+condition_variable cv[num_philosophers];
+
+void philosopher(int id) {
+    int left_fork = id;
+    int right_fork = (id + 1) % num_philosophers;
+
+    while (true) {
+        cout << "Philosopher " << id << " is thinking." << endl;
+        this_thread::sleep_for(chrono::milliseconds(1000));
+
+        unique_lock<mutex> left_lock(forks[left_fork]);
+        unique_lock<mutex> right_lock(forks[right_fork]);
+
+        cout << "Philosopher " << id << " is eating." << endl;
+        this_thread::sleep_for(chrono::milliseconds(1000));
+
+        left_lock.unlock();
+        right_lock.unlock();
+    }
+}
+
+int main() {
+    thread philosophers[num_philosophers];
+
+    for (int i = 0; i < num_philosophers; i++) {
+        philosophers[i] = thread(philosopher, i);
+    }
+
+    for (int i = 0; i < num_philosophers; i++) {
+        philosophers[i].join();
+    }
+
+    return 0;
+}
