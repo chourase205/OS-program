@@ -1,0 +1,35 @@
+public class BakeryAlgorithm {
+    private final boolean[] flag;
+    private final int[] label;
+    private final int n;
+
+    public BakeryAlgorithm(int n) {
+        this.n = n;
+        flag = new boolean[n];
+        label = new int[n];
+    }
+
+    public void lock(int threadId) {
+        flag[threadId] = true;
+        label[threadId] = max(label) + 1;
+        for (int i = 0; i < n; i++) {
+            while (i != threadId && flag[i] && (label[i] < label[threadId] || (label[i] == label[threadId] && i < threadId))) {
+                // wait
+            }
+        }
+    }
+
+    public void unlock(int threadId) {
+        flag[threadId] = false;
+    }
+
+    private int max(int[] array) {
+        int max = array[0];
+        for (int i = 1; i < array.length; i++) {
+            if (array[i] > max) {
+                max = array[i];
+            }
+        }
+        return max;
+    }
+}
