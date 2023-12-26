@@ -1,0 +1,53 @@
+import java.util.*;
+
+public class RoundRobin {
+    public static void main(String args[]) {
+        Scanner s = new Scanner(System.in);
+        System.out.print("Enter the number of process (maximum 10) = ");
+        int n = s.nextInt();
+        int[] bt = new int[10];
+        int[] wt = new int[10];
+        int[] tat = new int[10];
+        int[] rem_bt = new int[10];
+        float awt = 0, atat = 0;
+        System.out.print("Enter the burst time of the process\n");
+        for (int i = 0; i < n; i++) {
+            System.out.print("Burst time for process " + (i + 1) + ": ");
+            bt[i] = s.nextInt();
+            rem_bt[i] = bt[i];
+        }
+        System.out.print("Enter the time quantum: ");
+        int qt = s.nextInt();
+        int t = 0, count = 0, temp, sq = 0;
+        while (true) {
+            boolean done = true;
+            for (int i = 0; i < n; i++) {
+                if (rem_bt[i] > 0) {
+                    done = false;
+                    if (rem_bt[i] > qt) {
+                        t += qt;
+                        rem_bt[i] -= qt;
+                    } else {
+                        t += rem_bt[i];
+                        wt[i] = t - bt[i];
+                        rem_bt[i] = 0;
+                    }
+                }
+            }
+            if (done == true) {
+                break;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            tat[i] = bt[i] + wt[i];
+            awt += wt[i];
+            atat += tat[i];
+        }
+        System.out.println("Process\tBurst Time\tWaiting Time\tTurn Around Time");
+        for (int i = 0; i < n; i++) {
+            System.out.println((i + 1) + "\t\t" + bt[i] + "\t\t" + wt[i] + "\t\t" + tat[i]);
+        }
+        System.out.println("Average waiting time = " + (awt / n));
+        System.out.println("Average turn around time = " + (atat / n));
+    }
+}
