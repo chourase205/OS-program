@@ -1,0 +1,74 @@
+Deadlock:
+#include <mutex>
+#include <thread>
+
+std::mutex mutex1, mutex2;
+
+void threadA() {
+    mutex1.lock();
+    mutex2.lock();
+    // Use both resources
+    mutex2.unlock();
+    mutex1.unlock();
+}
+
+void threadB() {
+    mutex2.lock();
+    mutex1.lock();
+    // Use both resources
+    mutex1.unlock();
+    mutex2.unlock();
+}
+
+int main() {
+    std::thread t1(threadA);
+    std::thread t2(threadB);
+    t1.join();
+    t2.join();
+    return 0;
+}
+
+
+Livelock:
+#include <mutex>
+#include <thread>
+
+std::mutex mutex1, mutex2;
+
+void threadA() {
+    while (true) {
+        if (mutex1.try_lock()) {
+            if (mutex2.try_lock()) {
+                // Use both resources
+                mutex2.unlock();
+                mutex1.unlock();
+                break;
+            } else {
+                mutex1.unlock();
+            }
+        }
+    }
+}
+
+void threadB() {
+    while (true) {
+        if (mutex2.try_lock()) {
+            if (mutex1.try_lock()) {
+                // Use both resources
+                mutex1.unlock();
+                mutex2.unlock();
+                break;
+            } else {
+                mutex2.unlock();
+            }
+        }
+    }
+}
+
+int main() {
+    std::thread t1(threadA);
+    std::thread t2(threadB);
+    t1.join();
+    t2.join();
+    return 0;
+}
