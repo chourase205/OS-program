@@ -1,0 +1,95 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+const int num_processes = 5;
+const int num_resources = 3;
+
+vector<int> available(num_resources);
+vector<vector<int>> allocation(num_processes, vector<int>(num_resources));
+vector<vector<int>> max(num_processes, vector<int>(num_resources));
+vector<vector<int>> need(num_processes, vector<int>(num_resources));
+
+bool is_safe_state(vector<bool>& finish) {
+    vector<int> work(available);
+    for (int i = 0; i < num_processes; i++) {
+        if (!finish[i]) {
+            bool can_allocate = true;
+            for (int j = 0; j < num_resources; j++) {
+                if (need[i][j] > work[j]) {
+                    can_allocate = false;
+                    break;
+                }
+            }
+            if (can_allocate) {
+                for (int j = 0; j < num_resources; j++) {
+                    work[j] += allocation[i][j];
+                }
+                finish[i] = true;
+                i = -1;
+            }
+        }
+    }
+    return all_of(finish.begin(), finish.end(),  { return b; });
+}
+
+bool request_resources(int process_id, vector<int>& request) {
+    for (int i = 0; i < num_resources; i++) {
+        if (request[i] > need[process_id][i] || request[i] > available[i]) {
+            return false;
+        }
+    }
+    for (int i = 0; i < num_resources; i++) {
+        available[i] -= request[i];
+        allocation[process_id][i] += request[i];
+        need[process_id][i] -= request[i];
+    }
+    vector<bool> finish(num_processes, false);
+    return is_safe_state(finish);
+}
+
+int main() {
+    cout << "Enter the number of resources: ";
+    for (int i = 0; i < num_resources; i++) {
+        cin >> available[i];
+    }
+
+    cout << "Enter the allocation matrix: " << endl;
+    for (int i = 0; i < num_processes; i++) {
+        for (int j = 0; j < num_resources; j++) {
+            cin >> allocation[i][j];
+        }
+    }
+
+    cout << "Enter the max matrix: " << endl;
+    for (int i = 0; i < num_processes; i++) {
+        for (int j = 0; j < num_resources; j++) {
+            cin >> max[i][j];
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+
+    vector<bool> finish(num_processes, false);
+    if (is_safe_state(finish)) {
+        cout << "The system is in a safe state." << endl;
+    } else {
+        cout << "The system is not in a safe state." << endl;
+    }
+
+    cout << "Enter the process id and the request vector: ";
+    int process_id;
+    vector<int> request(num_resources);
+    cin >> process_id;
+    for (int i = 0; i < num_resources; i++) {
+        cin >> request[i];
+    }
+
+    if (request_resources(process_id, request)) {
+        cout << "The request can be granted." << endl;
+    } else {
+        cout << "The request cannot be granted." << endl;
+    }
+
+    return 0;
+}
