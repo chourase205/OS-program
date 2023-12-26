@@ -1,0 +1,123 @@
+Priority preemptive:
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+struct Process {
+    int id;
+    int burst_time;
+    int priority;
+    int remaining_time;
+};
+
+bool compare(Process a, Process b) {
+    return a.priority > b.priority;
+}
+
+int main() {
+    int n;
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    vector<Process> processes(n);
+    for (int i = 0; i < n; i++) {
+        cout << "Enter the burst time and priority of process " << i + 1 << ": ";
+        cin >> processes[i].burst_time >> processes[i].priority;
+        processes[i].id = i + 1;
+        processes[i].remaining_time = processes[i].burst_time;
+    }
+
+    int current_time = 0;
+    int total_waiting_time = 0;
+    int total_turnaround_time = 0;
+    cout << "Process\tBurst Time\tWaiting Time\tTurnaround Time\n";
+    while (true) {
+        bool all_done = true;
+        int highest_priority = -1;
+        int highest_priority_index = -1;
+        for (int i = 0; i < n; i++) {
+            if (processes[i].remaining_time > 0) {
+                all_done = false;
+                if (processes[i].priority > highest_priority) {
+                    highest_priority = processes[i].priority;
+                    highest_priority_index = i;
+                }
+            }
+        }
+        if (all_done) {
+            break;
+        }
+        processes[highest_priority_index].remaining_time--;
+        if (processes[highest_priority_index].remaining_time == 0) {
+            int waiting_time = current_time + 1 - processes[highest_priority_index].burst_time;
+            int turnaround_time = waiting_time + processes[highest_priority_index].burst_time;
+            total_waiting_time += waiting_time;
+            total_turnaround_time += turnaround_time;
+            cout << processes[highest_priority_index].id << "\t" << processes[highest_priority_index].burst_time << "\t\t" << waiting_time << "\t\t" << turnaround_time << endl;
+        }
+        current_time++;
+    }
+
+    double average_waiting_time = (double) total_waiting_time / n;
+    double average_turnaround_time = (double) total_turnaround_time / n;
+    cout << "Average waiting time: " << average_waiting_time << endl;
+    cout << "Average turnaround time: " << average_turnaround_time << endl;
+
+    return 0;
+}
+
+Non-priority preemptive:
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+struct Process {
+    int id;
+    int burst_time;
+    int priority;
+};
+
+bool compare(Process a, Process b) {
+    return a.priority > b.priority;
+}
+
+int main() {
+    int n;
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    vector<Process> processes(n);
+    for (int i = 0; i < n; i++) {
+        cout << "Enter the burst time and priority of process " << i + 1 << ": ";
+        cin >> processes[i].burst_time >> processes[i].priority;
+        processes[i].id = i + 1;
+    }
+
+    sort(processes.begin(), processes.end(), compare);
+
+    int total_waiting_time = 0;
+    int total_turnaround_time = 0;
+    cout << "Process\tBurst Time\tWaiting Time\tTurnaround Time\n";
+    for (int i = 0; i < n; i++) {
+        int waiting_time = 0;
+        for (int j = 0; j < i; j++) {
+            waiting_time += processes[j].burst_time;
+        }
+        int turnaround_time = waiting_time + processes[i].burst_time;
+        total_waiting_time += waiting_time;
+        total_turnaround_time += turnaround_time;
+        cout << processes[i].id << "\t" << processes[i].burst_time << "\t\t" << waiting_time << "\t\t" << turnaround_time << endl;
+    }
+
+    double average_waiting_time = (double) total_waiting_time / n;
+    double average_turnaround_time = (double) total_turnaround_time / n;
+    cout << "Average waiting time: " << average_waiting_time << endl;
+    cout << "Average turnaround time: " << average_turnaround_time << endl;
+
+    return 0;
+}
+
