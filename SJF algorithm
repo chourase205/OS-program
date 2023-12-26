@@ -1,0 +1,50 @@
+2.                                      import java.util.*;
+
+public class SJF {
+    public static void main(String args[]) {
+        Scanner s = new Scanner(System.in);
+        System.out.print("Enter the number of process: ");
+        int n = s.nextInt();
+        int[] bt = new int[n];
+        int[] wt = new int[n];
+        int[] tat = new int[n];
+        int[] p = new int[n];
+        float awt = 0, atat = 0;
+        System.out.print("Enter the burst time of the process:\n");
+        for (int i = 0; i < n; i++) {
+            System.out.print("p" + (i + 1) + ": ");
+            bt[i] = s.nextInt();
+            p[i] = i + 1;
+        }
+        for (int i = 0; i < n; i++) {
+            int pos = i;
+            for (int j = i + 1; j < n; j++) {
+                if (bt[j] < bt[pos]) {
+                    pos = j;
+                }
+            }
+            int temp = bt[i];
+            bt[i] = bt[pos];
+            bt[pos] = temp;
+            temp = p[i];
+            p[i] = p[pos];
+            p[pos] = temp;
+        }
+        wt[0] = 0;
+        for (int i = 1; i < n; i++) {
+            wt[i] = 0;
+            for (int j = 0; j < i; j++) {
+                wt[i] += bt[j];
+            }
+            awt += wt[i];
+        }
+        System.out.println("\nProcess\tBurst Time\tWaiting Time\tTurnaround Time");
+        for (int i = 0; i < n; i++) {
+            tat[i] = bt[i] + wt[i];
+            atat += tat[i];
+            System.out.println("p" + p[i] + "\t\t" + bt[i] + "\t\t" + wt[i] + "\t\t" + tat[i]);
+        }
+        System.out.println("\nAverage Waiting Time: " + (awt / n));
+        System.out.println("Average Turnaround Time: " + (atat / n));
+    }
+}
